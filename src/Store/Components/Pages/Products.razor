@@ -2,25 +2,248 @@
 @using DataEntities
 @using Store.Services
 @inject IConfiguration Configuration
+@inject ProductService ProductService
 @rendermode InteractiveServer
 @attribute [StreamRendering(true)]
 
 <PageTitle>Products</PageTitle>
 
-<h1>Products</h1>
-
-<p>Here are some of our amazing outdoor products that you can purchase.</p>
+<header class="products-header">
+    <p class="products-eyebrow">TinyShop / The outdoor collection</p>
+    <h1>Made for the<br />great outdoors.</h1>
+    <p class="products-intro">Discover the gear for wherever your next adventure takes you.</p>
+</header>
 
 @if (products == null)
 {
-    <p><em>Loading...</em></p>
+    <div class="loading-scene" role="status" aria-label="Loading products">
+        <div class="loader" aria-hidden="true"></div>
+        <p class="loading-caption">Gathering your gear</p>
+    </div>
+}
+else if (products.Count == 0)
+{
+    <p>No products are currently available.</p>
 }
 else
 {
-    <!--Implement Products table here-->
-    <p>Under construction...</p>
-
+    <div class="products-collection-heading">
+        <div>
+            <p class="products-section-label">Explore</p>
+            <h2>Our collection</h2>
+        </div>
+        <p class="products-count">@products.Count @(products.Count == 1 ? "product" : "products")</p>
+    </div>
+    <ul class="products-grid">
+        @foreach (var product in products)
+        {
+            <li class="product-card">
+                <div class="product-image">
+                    @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+                    {
+                        <img src="@($"{imagePrefix.TrimEnd('/')}/{product.ImageUrl.TrimStart('/')}")" alt="@product.Name" loading="lazy" />
+                    }
+                    else
+                    {
+                        <span>Image unavailable</span>
+                    }
+                </div>
+                <div class="product-heading">
+                    <h3>@product.Name</h3>
+                    <span class="product-price">@product.Price.ToString("C")</span>
+                </div>
+                <p class="product-description">@product.Description</p>
+            </li>
+        }
+    </ul>
 }
+
+<style>
+    .products-header {
+        padding: clamp(2.5rem, 6vw, 5rem);
+        background: linear-gradient(135deg, #052767, #3a0647);
+        color: #f9f8f3;
+    }
+
+    .products-eyebrow {
+        margin: 0 0 1.5rem;
+        color: #e0deed;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+    }
+
+    .products-header h1 {
+        margin: 0 0 1.25rem;
+        color: #f9f8f3;
+        font-family: Georgia, 'Times New Roman', serif;
+        font-size: clamp(2.75rem, 5.5vw, 5rem);
+        font-weight: 400;
+        letter-spacing: -0.04em;
+        line-height: 1.05;
+    }
+
+    .products-intro {
+        margin: 0;
+        max-width: 32rem;
+        color: #eeebf3;
+        line-height: 1.6;
+    }
+
+    .products-collection-heading {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: end;
+        justify-content: space-between;
+        gap: 1rem;
+        margin: 3rem 0 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #dedde4;
+    }
+
+    .products-section-label {
+        margin: 0 0 0.35rem;
+        color: #5f5c71;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+    }
+
+    .products-collection-heading h2 {
+        margin: 0;
+        color: #252b45;
+        font-family: Georgia, 'Times New Roman', serif;
+        font-size: 1.8rem;
+        font-weight: 400;
+    }
+
+    .products-count {
+        margin: 0;
+        color: #606174;
+        font-size: 0.875rem;
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+        gap: 3rem clamp(1rem, 2vw, 1.75rem);
+        margin: 0 0 3rem;
+        padding: 0;
+        list-style: none;
+    }
+
+    .product-card {
+        min-width: 0;
+    }
+
+    .product-image {
+        display: grid;
+        place-items: center;
+        aspect-ratio: 1;
+        overflow: hidden;
+        background: #f2f2f5;
+        color: #606174;
+        font-size: 0.875rem;
+        transition: box-shadow 200ms ease, transform 200ms ease;
+    }
+
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 250ms ease;
+    }
+
+    .product-heading {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.25rem 1rem;
+        margin-top: 0.9rem;
+    }
+
+    .product-heading h3 {
+        margin: 0;
+        color: #252b45;
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
+    .product-price {
+        flex-shrink: 0;
+        color: #252b45;
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    .product-description {
+        margin: 0.4rem 0 0;
+        color: #606174;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    @@media (hover: hover) {
+        .product-card:hover .product-image {
+            box-shadow: 0 0.75rem 1.5rem rgba(37, 43, 69, 0.12);
+            transform: translateY(-3px);
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.035);
+        }
+    }
+
+    .loading-scene {
+        display: grid;
+        justify-items: center;
+        gap: 1.25rem;
+        padding: 5rem 1rem;
+    }
+
+    .loader {
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 2px solid #dedde4;
+        border-top-color: #052767;
+        border-radius: 50%;
+        animation: loader-spin 1s linear infinite;
+    }
+
+    .loading-caption {
+        margin: 0;
+        color: #5f5c71;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    @@keyframes loader-spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        .product-image, .product-image img {
+            transition: none;
+        }
+
+        .product-card:hover .product-image,
+        .product-card:hover .product-image img {
+            transform: none;
+        }
+
+        .loader {
+            animation: none;
+        }
+    }
+</style>
 
 @code {
     private List<Product>? products;
@@ -30,8 +253,8 @@ else
     {
         // Simulate asynchronous loading to demonstrate streaming rendering
         await Task.Delay(500);
-        imagePrefix = Configuration["ImagePrefix"]!;
-        products = [];
+        imagePrefix = Configuration["ImagePrefix"] ?? throw new InvalidOperationException("ImagePrefix is not set");
+        products = await ProductService.GetProducts();
     }
 
 }

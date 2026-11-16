@@ -27,7 +27,20 @@ Install the .NET 10 or .NET 11 SDK, then run:
 dotnet build src\TinyShop.sln
 ```
 
+Package restore requires access to NuGet.org, which is configured in the repository's `NuGet.Config`.
+
 The app targets .NET 10 and rolls forward to a newer major runtime if .NET 10 is not installed.
+
+## Products API
+
+The Products service exposes these routes under `/api/Product`:
+
+- `GET /` lists products; `GET /{id}` retrieves one product.
+- `POST /` creates a product and returns `201 Created` with its generated ID and a `Location` header. Any ID supplied in the body is ignored.
+- `PUT /{id}` replaces the product's name, description, price, and image URL and returns `204 No Content`. The route ID identifies the product; the body ID is ignored.
+- `DELETE /{id}` removes a product and returns `204 No Content`.
+
+The individual GET, PUT, and DELETE routes return `404 Not Found` when the product does not exist. The service currently uses an in-memory database, so changes are lost when it restarts.
 
 ## License
 

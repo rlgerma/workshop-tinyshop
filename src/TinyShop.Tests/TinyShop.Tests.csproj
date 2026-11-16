@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DataEntities\DataEntities.csproj" />
+    <ProjectReference Include="..\Products\Products.csproj" />
   </ItemGroup>
 
   <ItemGroup>
