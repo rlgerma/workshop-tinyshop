@@ -2,3 +2,4 @@
 [Oo]bj/
 .vs/
 *.user
+/session-state/files/store-build/
